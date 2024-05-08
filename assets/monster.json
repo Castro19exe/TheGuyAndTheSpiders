@@ -1,0 +1,13 @@
+{"frames": 
+    {
+        "PARADO_01.png":
+        {
+            "frame": {"x":0,"y":0,"w":203,"h":216},
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {"x":0,"y":0,"w":22,"h":21},
+            "sourceSize": {"w":203,"h":216},
+            "pivot": {"x":0.5,"y":0.5}
+        }
+    }
+}

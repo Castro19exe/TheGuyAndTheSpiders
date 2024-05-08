@@ -1,0 +1,11 @@
+body {
+    height: 100%;
+    margin: 0 0;
+}
+
+canvas {
+    display: block;
+    background: url("./assets/background.png");
+    background-size: cover;
+    background-position: center;
+}
