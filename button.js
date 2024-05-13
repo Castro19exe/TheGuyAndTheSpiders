@@ -1,4 +1,4 @@
-class Monster extends Entity
+class Button extends Entity 
 {
     constructor(spriteSheet, x, y, canvasWidth, canvasHeight) {
         super();
@@ -37,17 +37,16 @@ class Monster extends Entity
     getSprite() {
         return this.frames[this.currentFrame];
     }
+    
    
     setup() {
-        // this.eStates.MOVE = this.spriteSheet.getStats('ANDAR');
-        // this.eStates.SHOOT = this.spriteSheet.getStats('DISPARAR');
         this.eStates.STOPPED = this.spriteSheet.getStats('PARADO');
-        // this.eStates.HIT = this.spriteSheet.getStats('ATINGIDO');
 
         this.frames = this.eStates[this.currentState];
         this.width = this.frames[0].width;
         this.height = this.frames[0].height;
     }
+
     
     stop() {
         this.toggleState(this.states.STOPPED);
@@ -63,5 +62,5 @@ class Monster extends Entity
         this.currentState = newState;
         this.frames = this.eStates[this.currentState];
         this.currentFrame = 0;
-    } 
+    }
 }

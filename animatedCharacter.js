@@ -2,8 +2,12 @@ let canvas;
 let drawingSurface;
 let spriteSheetCharacter;
 let spriteSheetEnemy;
+let spriteSheetButton;
 let entities = [];
 let activeKeys = new Array(255);
+
+let button = undefined;
+
 let tank = undefined;
 let enemy = undefined;
 let character = undefined;
@@ -25,11 +29,18 @@ function init() {
 
 	drawingSurface = canvas.getContext("2d");
 
-	spriteSheetCharacter = new SpriteSheet("assets/tank.png", "assets/tank.json", spriteLoaded);
-	spriteSheetEnemy = new SpriteSheet("assets/monster.png","assets/monster.json", monsterLoaded);
+	spriteSheetButton = new SpriteSheet("assets/img/btnPlay.png", "assets/button.json", spriteLoaded);
+
+	// spriteSheetCharacter = new SpriteSheet("assets/img/tank.png", "assets/tank.json", buttonsLoaded);
+	// spriteSheetEnemy = new SpriteSheet("assets/img/monster.png","assets/monster.json", monsterLoaded);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+
+function buttonsLoaded() {
+	tank = new Tank(spriteSheetCharacter, canvas.width * 0.5 - 36, 75, canvas.width, canvas.height);
+	entities.push(tank);
+}
 
 //Monster Functions
 function monsterLoaded(){
@@ -59,19 +70,19 @@ function moveMonster() {
 
 function collisionMonster() {
 	if(enemy.x + enemy.width == tank.x )
-	// if(enemy.x === tank.x) {
 		alert("gameover");
-	// }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 function spriteLoaded() {
-	tank = new Tank(spriteSheetCharacter, canvas.width * 0.5 - 36, 75	, canvas.width, canvas.height);
-	entities.push(tank);
+	button = new Button(spriteSheetButton, canvas.width * 0.5 - 36, 75, canvas.width, canvas.height);
+	entities.push(button);	
 
   	update();
+
 	setInterval(moveMonster, 10);
+
   	window.addEventListener("keydown", keyDownHandler, false);
   	window.addEventListener("keyup", keyUpHandler, false);
 }
