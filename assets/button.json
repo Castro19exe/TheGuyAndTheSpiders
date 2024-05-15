@@ -9,14 +9,5 @@
             "sourceSize": {"w":256,"h":258},
             "pivot": {"x":0.5,"y":0.5}
         }
-    },
-    "meta": {
-        "app": "http://www.codeandweb.com/texturepacker",
-        "version": "1.0",
-        "image": "btnPlay.png",
-        "format": "RGBA8888",
-        "size": {"w":353,"h":353},
-        "scale": "1",
-        "smartupdate": "$TexturePacker:SmartUpdate:201895058c7d49c2d58f4f61a9d09b1d:42ace519a800e0aa35dd32e7b997445b:e5746570371ae3e0565b6e20f5a72ab3$"
     }
 }

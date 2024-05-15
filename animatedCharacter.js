@@ -1,6 +1,6 @@
 let canvas;
 let drawingSurface;
-let spriteSheetCharacter;
+let spriteSheetHero;
 let spriteSheetEnemy;
 let spriteSheetButton;
 let entities = [];
@@ -8,10 +8,10 @@ let activeKeys = new Array(255);
 
 let button = undefined;
 
-let tank = undefined;
+let hero = undefined;
 let enemy = undefined;
 let character = undefined;
-
+let round = 1
 let keyboard = {
 	SPACE: 32,
 	LEFT: 65,
@@ -26,23 +26,88 @@ function init() {
 	canvas = document.querySelector("canvas");
 	canvas.width = window.innerWidth
 	canvas.height = window.innerHeight;
-
 	drawingSurface = canvas.getContext("2d");
 
-	spriteSheetButton = new SpriteSheet("assets/img/btnPlay.png", "assets/button.json", spriteLoaded);
+	// menu
+	spriteSheetButton = new SpriteSheet("assets/img/btnPlay.png", "assets/button.json", carregarBotao);
+	canvas.addEventListener("click", canvasClick)
+}
 
-	// spriteSheetCharacter = new SpriteSheet("assets/img/tank.png", "assets/tank.json", buttonsLoaded);
-	// spriteSheetEnemy = new SpriteSheet("assets/img/monster.png","assets/monster.json", monsterLoaded);
+function startgame(){
+	canvas.style.background= "url('./assets/img/background.png');"
+
+	spriteSheetHero = new SpriteSheet("assets/img/tank.png","assets/tank.json", heroLoaded);
+	spriteSheetEnemy = new SpriteSheet("assets/img/monster.png","assets/monster.json", spawnMonster);
+
+	console.log("log out");
+
+	startRound();
+
+	update();
+
+	window.addEventListener("keydown", keyDownHandler, false);
+	window.addEventListener("keyup", keyUpHandler, false);
+}
+
+function startRound(){
+	if(verificarSeExisteEnemies())
+		console.log("Existe Inimigos");
+	else {
+		loadMonsters()
+		round++;
+	}
+};
+
+function canvasClick(e){
+	// saber se a possiçao que foi clicada no canvas é a mesma posiçao do botao do menu
+	clickedX = e.clientX
+	clickedY = e.clientY
+
+	console.log(button.x)
+	
+	if(clickedX > button.x && clickedX < button.x + button.width && clickedY>	 button.y && clickedY< button.y+ button.height ){
+		entities.pop(button)
+		startgame();
+		canvas.removeEventListener('click', canvasClick);
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function buttonsLoaded() {
-	tank = new Tank(spriteSheetCharacter, canvas.width * 0.5 - 36, 75, canvas.width, canvas.height);
-	entities.push(tank);
+function heroLoaded() {
+	hero = new Hero(spriteSheetHero, canvas.width * 0.5 , canvas.height*0.5, canvas.width, canvas.height)
+	entities.push(hero);
+}
+
+function monsterLoaded() {
+	enemy = new Monster(spriteSheetEnemy, x, y, canvas.width, canvas.height);
+	entities.push(enemy);
+}
+
+function spawnMonster() {
+	MARGEM = 1000;
+
+	do {
+		x = Math.random() * canvas.width;
+		y = Math.random() * canvas.height;
+	} while (x > (hero.x + hero.width + MARGEM) && x < (hero.x - MARGEM) && y > (hero.y + hero.height + MARGEM) && y < (hero.y - MARGEM));
+
+	enemy = new Monster(spriteSheetEnemy, x, y, canvas.width, canvas.height);
+	entities.push(enemy);
 }
 
 //Monster Functions
+function loadMonsters(){
+	enemysQuantity = round * 5;
+
+	time = 1000;
+
+	for(i = 0; i < enemysQuantity; i++) {
+		setTimeout( spawnMonster, time)
+		time += 500;
+	}
+}
+
 function monsterLoaded(){
 	for(i = 0; i < 1; i++) {
 		enemy = new Monster(spriteSheetEnemy, canvas.width * 0.5 - 356 + (i * 20), 345, canvas.width, canvas.height);
@@ -51,17 +116,17 @@ function monsterLoaded(){
 }
 
 function moveMonster() {
-	if(enemy.x < tank.x){
+	if(enemy.x < hero.x){
 		enemy.x++;
 	}
-	if(enemy.x> tank.x){
+	if(enemy.x> hero.x){
 		enemy.x--;
 	}
 
-	if(enemy.y < tank.y){
+	if(enemy.y < hero.y){
 		enemy.y++;
 	}
-	if(enemy.y > tank.y){
+	if(enemy.y > hero.y){
 		enemy.y--;
 	}
 
@@ -69,23 +134,18 @@ function moveMonster() {
 }
 
 function collisionMonster() {
-	if(enemy.x + enemy.width == tank.x )
+	if(enemy.x + enemy.width == hero.x )
 		alert("gameover");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+function carregarBotao() {
 
-function spriteLoaded() {
-	button = new Button(spriteSheetButton, canvas.width * 0.5 - 36, 75, canvas.width, canvas.height);
+	button = new Button(spriteSheetButton, canvas.width * 0.5 - 128, canvas.height*0.5 - 258*0.5, canvas.width, canvas.height);
 	entities.push(button);	
-
-  	update();
-
-	setInterval(moveMonster, 10);
-
-  	window.addEventListener("keydown", keyDownHandler, false);
-  	window.addEventListener("keyup", keyUpHandler, false);
+	update();
 }
+
 
 function keyDownHandler(e) {
 	activeKeys[e.keyCode] = true;  
@@ -93,30 +153,45 @@ function keyDownHandler(e) {
 
 function keyUpHandler(e) {
 	activeKeys[e.keyCode] = false;  
-	tank.stop();
+	hero.stop();
+}
+
+function verificarSeExisteEnemies() {
+    for (const entity of entities) {
+        if (entity instanceof Monster) {
+            console.log("Inimigo encontrado!");
+            return true; // Se encontrar um Monster, retorna true imediatamente
+        }
+    }
+
+    console.log("Nenhum inimigo encontrado.");
+    return false; // Se percorrer todos os elementos e não encontrar um Monster, retorna false
 }
 
 function update() {
  	if (activeKeys[keyboard.LEFT])
-		tank.move(tank.direction.LEFT);
+		hero.move(hero.direction.LEFT);
 	if (activeKeys[keyboard.RIGHT])
-		tank.move(tank.direction.RIGHT);
+		hero.move(hero.direction.RIGHT);
 	if (activeKeys[keyboard.UP])
-		tank.move(tank.direction.UP);
+		hero.move(hero.direction.UP);
 	if (activeKeys[keyboard.DOWN])
-		tank.move(tank.direction.DOWN);
+		hero.move(hero.direction.DOWN);
 
+	
+		
+	
     // if (activeKeys[keyboard.SPACE]) 
 	// {
 	// 	activeKeys[keyboard.SPACE] = false;
-	// 	tank.stop();
+	// 	hero.stop();
 
-	// 	let fire = new Fire(spriteSheet, tank.x - 10,
-	// 		tank.y + tank.height * 0.5 - 10);
+	// 	let fire = new Fire(spriteSheet, hero.x - 10,
+	// 		hero.y + hero.height * 0.5 - 10);
 	// 	entities.push(fire);
 
 	// 	let bullet = new Bullet(spriteSheet,
-	// 		tank.x, tank.y + tank.height * 0.5);
+	// 		hero.x, hero.y + hero.height * 0.5);
 	// 	entities.push(bullet);
 	// }
   
