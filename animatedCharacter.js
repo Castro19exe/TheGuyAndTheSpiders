@@ -9,7 +9,6 @@ let activeKeys = new Array(255);
 let button = undefined;
 
 let hero = undefined;
-let enemy = undefined;
 let character = undefined;
 let round = 1
 let keyboard = {
@@ -39,7 +38,6 @@ function startgame(){
 	spriteSheetHero = new SpriteSheet("assets/img/tank.png","assets/tank.json", heroLoaded);
 	spriteSheetEnemy = new SpriteSheet("assets/img/monster.png","assets/monster.json", spawnMonster);
 
-	console.log("log out");
 
 	startRound();
 
@@ -116,24 +114,27 @@ function monsterLoaded(){
 }
 
 function moveMonster() {
-	if(enemy.x < hero.x){
-		enemy.x++;
-	}
-	if(enemy.x> hero.x){
-		enemy.x--;
-	}
 
-	if(enemy.y < hero.y){
-		enemy.y++;
-	}
-	if(enemy.y > hero.y){
-		enemy.y--;
-	}
-
-	collisionMonster();
+	entities.forEach(entity => {
+		if (entity instanceof Monster){
+			if(entity.x < hero.x){
+				entity.x++;
+			}
+			if(entity.x> hero.x){
+				entity.x--;
+			}
+			if(entity.y < hero.y){
+				entity.y++;
+			}
+			if(entity.y > hero.y){
+				entity.y--;
+			}
+			collisionMonster(entity);
+		}
+	});	
 }
 
-function collisionMonster() {
+function collisionMonster(enemy) {
 	if(enemy.x + enemy.width == hero.x )
 		alert("gameover");
 }
@@ -159,13 +160,10 @@ function keyUpHandler(e) {
 function verificarSeExisteEnemies() {
     for (const entity of entities) {
         if (entity instanceof Monster) {
-            console.log("Inimigo encontrado!");
-            return true; // Se encontrar um Monster, retorna true imediatamente
+            return true; 
         }
     }
-
-    console.log("Nenhum inimigo encontrado.");
-    return false; // Se percorrer todos os elementos e não encontrar um Monster, retorna false
+    return false; 
 }
 
 function update() {
@@ -177,10 +175,8 @@ function update() {
 		hero.move(hero.direction.UP);
 	if (activeKeys[keyboard.DOWN])
 		hero.move(hero.direction.DOWN);
-
 	
-		
-	
+	moveMonster();
     // if (activeKeys[keyboard.SPACE]) 
 	// {
 	// 	activeKeys[keyboard.SPACE] = false;
