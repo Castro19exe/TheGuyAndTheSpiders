@@ -44,7 +44,7 @@ function startgame(){
 	canvas.style.background = `url('${url}')`;
 	spriteSheetHero = new SpriteSheet("assets/img/tank.png","assets/tank.json", heroLoaded);
 	spriteSheetEnemy = new SpriteSheet("assets/img/monster.png","assets/monster.json", spawnMonster);
-
+	spriteSheetKnife = new SpriteSheet("assets/img/knife.png","assets/knife.json", {});
 	startRound();
 
 	update();
@@ -62,8 +62,13 @@ function startRound(){
 	}
 };
 function loadKnife(x,y){
-	knife  =  new Projectile(spriteSheetKnife, hero.x ,hero.y,x,y, canvas.width, canvas.height)
+	knife  =  new Projectile(spriteSheetKnife, hero.x ,hero.y , x,y, canvas.width, canvas.height)
 	entities.push(knife)
+
+
+	
+
+
 }
 function canvasClick(e){
 	// saber se a possiçao que foi clicada no canvas é a mesma posiçao do botao do menu
@@ -72,8 +77,7 @@ function canvasClick(e){
 
 	if(isGameStarted){
 		//trow knife
-		spriteSheetKnife = new SpriteSheet("assets/img/knife.png","assets/tank.json", loadKnife(clickedX,clickedY));
-
+		loadKnife(clickedX,clickedY)
 
 	}
 	else if(clickedX > button.x && clickedX < button.x + button.width && clickedY>	 button.y && clickedY< button.y+ button.height){
@@ -128,6 +132,20 @@ function moveMonster() {
 				entity.y--;
 			}
 			collisionMonster(entity);
+		}
+		else if(entity instanceof Projectile){
+			if(entity.x < entity.destinyX){
+				entity.x++;
+			}
+			if(entity.x>  entity.destinyX){
+				entity.x--;
+			}
+			if(entity.y <  entity.destinyY){
+				entity.y++;
+			}
+			if(entity.y > entity.destinyY){
+				entity.y--;
+			}
 		}
 	});	
 }
