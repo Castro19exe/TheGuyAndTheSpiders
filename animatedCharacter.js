@@ -41,7 +41,8 @@ function carregarBotao() {
 function startgame(){
 	isGameStarted = true;
 	url = './assets/img/background.png';
-	canvas.style.background = `url('${url}')`;
+	canvas.style.background = `url('${url}')`;	
+	canvas.style.backgroundSize = 'cover'; 
 	spriteSheetHero = new SpriteSheet("assets/img/tank.png","assets/tank.json", heroLoaded);
 	spriteSheetEnemy = new SpriteSheet("assets/img/monster.png","assets/monster.json", spawnMonster);
 	spriteSheetKnife = new SpriteSheet("assets/img/knife.png","assets/knife.json", {});
@@ -115,44 +116,53 @@ function loadMonsters(){
 		time += 500;
 	}
 }
-function moveEntity(entity, destinyX, destinyY, velocity){
-	if(entity.x <destinyX){
-		entity.x+=velocity;
-	}
-	if(entity.x> destinyX){
-		entity.x-=velocity;
-	}
-	if(entity.y < destinyY){
-		entity.y+=velocity;
-	}
-	if(entity.y >destinyY){
-		entity.y-=velocity;
-	}
+
+
+function moveEntity(entity, destinyX, destinyY, velocity) {
+    let deltaX = destinyX - entity.x;
+    let deltaY = destinyY - entity.y;
+    let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+    if (distance > velocity) {
+        let stepX = (deltaX / distance) * velocity;
+        let stepY = (deltaY / distance) * velocity;
+
+        entity.x += stepX;
+        entity.y += stepY;
+    } else {
+        entity.x = destinyX;
+        entity.y = destinyY;
+    }
 }
+
 function entitiesActions() {
-	removeEntities =[]
-	entities.forEach(entity => {
-		if (entity instanceof Monster){
-			
-			moveEntity(entity, hero.x, hero.y, 1);
-			collisionMonster(entity);
-		}
-		else if(entity instanceof Projectile){
-			if(entity.x === entity.destinyX && entity.y === entity.destinyY){
-				//chegou ao destino
-				console.log("chegou ao destino");
-				removeEntities.push(entity);
-			}
-			moveEntity(entity, entity.destinyX, entity.destinyY, 5);
-			
-		}
-	});	
-	if(removeEntities.length != 0){
-		removeEntities.forEach(element => {
-			entities.pop(element);
-		});
-	}
+    let removeEntities = [];
+    
+    entities.forEach(entity => {
+        if (entity instanceof Monster) {
+            moveEntity(entity, hero.x, hero.y, 1);
+            collisionMonster(entity);
+        } else if (entity instanceof Projectile) {
+            if (entity.x === entity.destinyX && entity.y === entity.destinyY) {
+                // chegou ao destino
+                console.log("chegou ao destino");
+                removeEntities.push(entity);
+            } else {
+                moveEntity(entity, entity.destinyX, entity.destinyY, 5);
+            }
+        }
+    });
+    
+    if (removeEntities.length !== 0) {
+        removeEntities.forEach(entity => {
+            let index = entities.indexOf(entity);
+            if (index > -1) {
+                entities.splice(index, 1);
+            }
+        });
+    }
 }
+
 
 function collisionMonster(enemy) {
 	//nao esta a funfar
