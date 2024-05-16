@@ -1,6 +1,6 @@
 class Projectile extends Entity 
 {
-    constructor(spriteSheet, x, y,destinyX,destinyY, canvasWidth, canvasHeight) {
+    constructor(spriteSheet, x, y,destinyX,destinyY, velocity, canvasWidth, canvasHeight, damage) {
         super();
         this.states = {
             MOVE: 'MOVE',
@@ -27,6 +27,8 @@ class Projectile extends Entity
         this.vy = 3;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
+        this.damage = damage;
+        this.velocity =velocity;
         this.setup();
     }
     

@@ -1,6 +1,6 @@
 class Monster extends Entity
 {
-    constructor(spriteSheet, x, y, canvasWidth, canvasHeight) {
+    constructor(spriteSheet, x, y,velocity, canvasWidth, canvasHeight, life) {
         super();
         this.states = {
             MOVE: 'MOVE',
@@ -25,6 +25,8 @@ class Monster extends Entity
         this.vy = 3;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
+        this.life = life;
+        this.velocity = velocity;
         this.setup();
     }
     
