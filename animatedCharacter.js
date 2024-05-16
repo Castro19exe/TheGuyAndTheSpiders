@@ -115,39 +115,43 @@ function loadMonsters(){
 		time += 500;
 	}
 }
-
-function moveMonster() {
+function moveEntity(entity, destinyX, destinyY, velocity){
+	if(entity.x <destinyX){
+		entity.x+=velocity;
+	}
+	if(entity.x> destinyX){
+		entity.x-=velocity;
+	}
+	if(entity.y < destinyY){
+		entity.y+=velocity;
+	}
+	if(entity.y >destinyY){
+		entity.y-=velocity;
+	}
+}
+function entitiesActions() {
+	removeEntities =[]
 	entities.forEach(entity => {
 		if (entity instanceof Monster){
-			if(entity.x < hero.x){
-				entity.x++;
-			}
-			if(entity.x> hero.x){
-				entity.x--;
-			}
-			if(entity.y < hero.y){
-				entity.y++;
-			}
-			if(entity.y > hero.y){
-				entity.y--;
-			}
+			
+			moveEntity(entity, hero.x, hero.y, 1);
 			collisionMonster(entity);
 		}
 		else if(entity instanceof Projectile){
-			if(entity.x < entity.destinyX){
-				entity.x++;
+			if(entity.x === entity.destinyX && entity.y === entity.destinyY){
+				//chegou ao destino
+				console.log("chegou ao destino");
+				removeEntities.push(entity);
 			}
-			if(entity.x>  entity.destinyX){
-				entity.x--;
-			}
-			if(entity.y <  entity.destinyY){
-				entity.y++;
-			}
-			if(entity.y > entity.destinyY){
-				entity.y--;
-			}
+			moveEntity(entity, entity.destinyX, entity.destinyY, 5);
+			
 		}
 	});	
+	if(removeEntities.length != 0){
+		removeEntities.forEach(element => {
+			entities.pop(element);
+		});
+	}
 }
 
 function collisionMonster(enemy) {
@@ -187,7 +191,7 @@ function update() {
 	if (activeKeys[keyboard.DOWN])
 		hero.move(hero.direction.DOWN);
 	
-	moveMonster();
+	entitiesActions();
   
 	for (let i = 0; i < entities.length; i++)
 		entities[i].update();
