@@ -5,11 +5,11 @@ let spriteSheetEnemy;
 let spriteSheetButton;
 let entities = [];
 let activeKeys = new Array(255);
-
+let isGameStarted = false;
 let button = undefined;
-
 let hero = undefined;
 let character = undefined;
+let spriteSheetKnife;
 let round = 1
 let keyboard = {
 	SPACE: 32,
@@ -31,13 +31,19 @@ function init() {
 	spriteSheetButton = new SpriteSheet("assets/img/btnPlay.png", "assets/button.json", carregarBotao);
 	canvas.addEventListener("click", canvasClick)
 }
+//MENU
+function carregarBotao() {
+	button = new Button(spriteSheetButton, canvas.width * 0.5 - 128, canvas.height*0.5 - 258*0.5, canvas.width, canvas.height);
+	entities.push(button);	
+	update();
+}
 
 function startgame(){
-	canvas.style.background= "url('./assets/img/background.png');"
-
+	isGameStarted = true;
+	url = './assets/img/background.png';
+	canvas.style.background = `url('${url}')`;
 	spriteSheetHero = new SpriteSheet("assets/img/tank.png","assets/tank.json", heroLoaded);
 	spriteSheetEnemy = new SpriteSheet("assets/img/monster.png","assets/monster.json", spawnMonster);
-
 
 	startRound();
 
@@ -55,43 +61,43 @@ function startRound(){
 		round++;
 	}
 };
-
+function loadKnife(x,y){
+	knife  =  new Projectile(spriteSheetKnife, hero.x ,hero.y,x,y, canvas.width, canvas.height)
+	entities.push(knife)
+}
 function canvasClick(e){
 	// saber se a possiçao que foi clicada no canvas é a mesma posiçao do botao do menu
 	clickedX = e.clientX
 	clickedY = e.clientY
 
-	console.log(button.x)
-	
-	if(clickedX > button.x && clickedX < button.x + button.width && clickedY>	 button.y && clickedY< button.y+ button.height ){
+	if(isGameStarted){
+		//trow knife
+		spriteSheetKnife = new SpriteSheet("assets/img/knife.png","assets/tank.json", loadKnife(clickedX,clickedY));
+
+
+	}
+	else if(clickedX > button.x && clickedX < button.x + button.width && clickedY>	 button.y && clickedY< button.y+ button.height){
 		entities.pop(button)
 		startgame();
-		canvas.removeEventListener('click', canvasClick);
 	}
-}
 
-//----------------------------------------------------------------------------------------------------------------------
+}
 
 function heroLoaded() {
 	hero = new Hero(spriteSheetHero, canvas.width * 0.5 , canvas.height*0.5, canvas.width, canvas.height)
 	entities.push(hero);
 }
 
-function monsterLoaded() {
-	enemy = new Monster(spriteSheetEnemy, x, y, canvas.width, canvas.height);
-	entities.push(enemy);
-}
-
 function spawnMonster() {
 	MARGEM = 1000;
-
+	if(hero != undefined){
 	do {
 		x = Math.random() * canvas.width;
 		y = Math.random() * canvas.height;
 	} while (x > (hero.x + hero.width + MARGEM) && x < (hero.x - MARGEM) && y > (hero.y + hero.height + MARGEM) && y < (hero.y - MARGEM));
 
 	enemy = new Monster(spriteSheetEnemy, x, y, canvas.width, canvas.height);
-	entities.push(enemy);
+	entities.push(enemy);}
 }
 
 //Monster Functions
@@ -106,15 +112,7 @@ function loadMonsters(){
 	}
 }
 
-function monsterLoaded(){
-	for(i = 0; i < 1; i++) {
-		enemy = new Monster(spriteSheetEnemy, canvas.width * 0.5 - 356 + (i * 20), 345, canvas.width, canvas.height);
-		entities.push(enemy);
-	}
-}
-
 function moveMonster() {
-
 	entities.forEach(entity => {
 		if (entity instanceof Monster){
 			if(entity.x < hero.x){
@@ -135,17 +133,12 @@ function moveMonster() {
 }
 
 function collisionMonster(enemy) {
+	//nao esta a funfar
 	if(enemy.x + enemy.width == hero.x )
 		alert("gameover");
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-function carregarBotao() {
-
-	button = new Button(spriteSheetButton, canvas.width * 0.5 - 128, canvas.height*0.5 - 258*0.5, canvas.width, canvas.height);
-	entities.push(button);	
-	update();
-}
 
 
 function keyDownHandler(e) {
@@ -177,19 +170,6 @@ function update() {
 		hero.move(hero.direction.DOWN);
 	
 	moveMonster();
-    // if (activeKeys[keyboard.SPACE]) 
-	// {
-	// 	activeKeys[keyboard.SPACE] = false;
-	// 	hero.stop();
-
-	// 	let fire = new Fire(spriteSheet, hero.x - 10,
-	// 		hero.y + hero.height * 0.5 - 10);
-	// 	entities.push(fire);
-
-	// 	let bullet = new Bullet(spriteSheet,
-	// 		hero.x, hero.y + hero.height * 0.5);
-	// 	entities.push(bullet);
-	// }
   
 	for (let i = 0; i < entities.length; i++)
 		entities[i].update();
