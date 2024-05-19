@@ -4,11 +4,13 @@ let spriteSheetHero;
 let spriteSheetEnemy;
 let spriteSheetButton;
 let spriteSheetKnife;
-let entities = [];
+// Entities HEROE + BOTOES etc
+let entities = []; 
+let projectiles = [];
+let monsters = [];
 let activeKeys = new Array(255);
 let isGameStarted = false;
 let button = undefined;
-let hero = undefined;
 let round = 1;
 
 let keyboard = {
@@ -27,7 +29,7 @@ function init() {
     canvas.height = window.innerHeight;
     drawingSurface = canvas.getContext("2d");
 
-    // menu
+    // Menu
     spriteSheetButton = new SpriteSheet("assets/img/btnPlay.png", "assets/button.json", carregarBotao);
     canvas.addEventListener("click", canvasClick);
 }
@@ -38,44 +40,49 @@ function carregarBotao() {
     entities.push(button);
     update();
 }
+function a(){}
 
 function startgame() {
     isGameStarted = true;
-    url = './assets/img/background.png';
+    let url = './assets/img/background.png';
     canvas.style.background = `url('${url}')`;
     canvas.style.backgroundSize = 'cover';
     spriteSheetHero = new SpriteSheet("assets/img/tank.png", "assets/tank.json", heroLoaded);
     spriteSheetEnemy = new SpriteSheet("assets/img/monster.png", "assets/monster.json", spawnMonster);
-    spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", null);
-    startRound();
+    spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", a);
+    
+    //começar rondas
+    setInterval(() => {
+        startRound();
+    }, 5000);
+    
     update();
+
     window.addEventListener("keydown", keyDownHandler, false);
     window.addEventListener("keyup", keyUpHandler, false);
 }
 
 function startRound() {
-    if (verificarSeExisteEnemies()) {
-        console.log("Existe Inimigos");
-    } else {
+    if (monsters.length ==0) {
         loadMonsters();
         round++;
     }
 }
 
 function loadKnife(x, y) {
-    let knife = new Projectile(spriteSheetKnife, hero.x, hero.y, x, y,5, canvas.width, canvas.height, 3);
-    entities.push(knife);
+    let knife = new Projectile(spriteSheetKnife, hero.x, hero.y, x, y, 5, canvas.width, canvas.height, 3);
+    projectiles.push(knife);
 }
 
 function canvasClick(e) {
-    // saber se a posição que foi clicada no canvas é a mesma posição do botão do menu
     let clickedX = e.clientX;
     let clickedY = e.clientY;
 
     if (isGameStarted) {
-        // throw knife
+        // Throw knife
         loadKnife(clickedX, clickedY);
     } else if (clickedX > button.x && clickedX < button.x + button.width && clickedY > button.y && clickedY < button.y + button.height) {
+        //CLICOU NO BOTAO
         entities.pop(button);
         startgame();
     }
@@ -88,7 +95,7 @@ function heroLoaded() {
 
 function spawnMonster() {
     const MARGEM = 1000;
-    if (hero != undefined) {
+    if (hero != null) {
         let x, y;
         do {
             x = Math.random() * canvas.width;
@@ -98,12 +105,11 @@ function spawnMonster() {
             y > (hero.y + hero.height + MARGEM) || y < (hero.y - MARGEM)
         );
 
-        let enemy = new Monster(spriteSheetEnemy, x, y,1, canvas.width, canvas.height, 5);
-        entities.push(enemy);
+        let enemy = new Monster(spriteSheetEnemy, x, y, 1, canvas.width, canvas.height, 5);
+        monsters.push(enemy);
     }
 }
 
-// Monster Functions
 function loadMonsters() {
     let enemysQuantity = round * 5;
     let time = 1000;
@@ -143,46 +149,72 @@ function detectCollision(entity1, entity2) {
 function entitiesActions() {
     let removeEntities = [];
 
+    // HERO
     entities.forEach(entity => {
-        if (entity instanceof Monster) {
-            moveEntity(entity, hero.x, hero.y, entity.velocity);
-            if (detectCollision(entity, hero)) {
-                //alert("MORRESTE");
+        if (entity instanceof Hero) {
+            if (activeKeys[keyboard.LEFT]) {
+                entity.move(entity.direction.LEFT);
             }
-        } else if (entity instanceof Projectile) {
-            if (entity.x === entity.destinyX && entity.y === entity.destinyY) {
-
-                removeEntities.push(entity);
-            } else {
-                moveEntity(entity, entity.destinyX, entity.destinyY, entity.velocity);
+            if (activeKeys[keyboard.RIGHT]) {
+                entity.move(entity.direction.RIGHT);
+            }
+            if (activeKeys[keyboard.UP]) {
+                entity.move(entity.direction.UP);
+            }
+            if (activeKeys[keyboard.DOWN]) {
+                entity.move(entity.direction.DOWN);
             }
         }
     });
 
-    // COLISSOES
-    entities.forEach(monster => {
-        if (monster instanceof Monster) {
-            entities.forEach(projetile => {
-                if (projetile instanceof Projectile && detectCollision(monster, projetile)) {
-					
-					monster.life-= projetile.damage;
-					if(monster.life<=0){
-						removeEntities.push(monster);
-					}
-                    removeEntities.push(projetile);
+    // PROJECTILES ACTIONS
+    projectiles.forEach(projectile => {
+        if (projectile.x === projectile.destinyX && projectile.y === projectile.destinyY) {
+            removeEntities.push(projectile);
+        } else {
+            moveEntity(projectile, projectile.destinyX, projectile.destinyY, projectile.velocity);
+        }
+    });
+
+    // MONSTER ACTIONS
+    monsters.forEach(monster => {
+        moveEntity(monster, hero.x, hero.y, monster.velocity);
+        if (detectCollision(monster, hero)) {
+            //alert("MORRESTE");
+
+            //tirar vida ao heroi aqui
+        }
+    });
+
+    // COLISON BETWEN MONSTER AND PROJECTILES
+    monsters.forEach(monster => {
+        projectiles.forEach(projectile => {
+            if (detectCollision(monster, projectile)) {
+                monster.life -= projectile.damage;
+                if (monster.life <= 0) {
+                    removeEntities.push(monster);
                 }
-            });
-        }
-    });
-
-    if (removeEntities.length !== 0) {
-        removeEntities.forEach(entity => {
-            let index = entities.indexOf(entity);
-            if (index > -1) {
-                entities.splice(index, 1);
+                removeEntities.push(projectile);
             }
         });
-    }
+    });
+
+    // ENTIDADES A REMOVER
+    removeEntities.forEach(entity => {
+        let index;
+        index = projectiles.indexOf(entity);
+        if (index > -1) {
+            projectiles.splice(index, 1);
+        }
+        index = monsters.indexOf(entity);
+        if (index > -1) {
+            monsters.splice(index, 1);
+        }
+        index = entities.indexOf(entity);
+        if (index > -1) {
+            entities.splice(index, 1);
+        }
+    });
 }
 
 function keyDownHandler(e) {
@@ -191,37 +223,19 @@ function keyDownHandler(e) {
 
 function keyUpHandler(e) {
     activeKeys[e.keyCode] = false;
-    hero.stop();
+    if (hero) {
+        hero.stop();
+    }
 }
 
-function verificarSeExisteEnemies() {
-    for (const entity of entities) {
-        if (entity instanceof Monster) {
-            return true;
-        }
-    }
-    return false;
-}
+
 
 function update() {
-    if (activeKeys[keyboard.LEFT]) {
-        hero.move(hero.direction.LEFT);
-    }
-    if (activeKeys[keyboard.RIGHT]) {
-        hero.move(hero.direction.RIGHT);
-    }
-    if (activeKeys[keyboard.UP]) {
-        hero.move(hero.direction.UP);
-    }
-    if (activeKeys[keyboard.DOWN]) {
-        hero.move(hero.direction.DOWN);
-    }
-
     entitiesActions();
 
-    for (let i = 0; i < entities.length; i++) {
-        entities[i].update();
-    }
+    entities.forEach(entity => entity.update());
+    projectiles.forEach(projectile => projectile.update());
+    monsters.forEach(monster => monster.update());
 
     requestAnimationFrame(update, canvas);
     render();
@@ -230,18 +244,36 @@ function update() {
 function render() {
     drawingSurface.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i < entities.length; i++) {
-        let entity = entities[i];
+    entities.forEach(entity => {
         let sprite = entity.getSprite();
+        drawingSurface.drawImage(
+            entity.spriteSheet.img,
+            sprite.x, sprite.y,
+            sprite.width, sprite.height,
+            entity.x, entity.y,
+            entity.width, entity.height
+        );
+    });
 
-        if (!entity.killed) {
-            drawingSurface.drawImage(
-                entity.spriteSheet.img,
-                sprite.x, sprite.y,
-                sprite.width, sprite.height,
-                entity.x, entity.y,
-                entity.width, entity.height
-            );
-        }
-    }
+    projectiles.forEach(projectile => {
+        let sprite = projectile.getSprite();
+        drawingSurface.drawImage(
+            projectile.spriteSheet.img,
+            sprite.x, sprite.y,
+            sprite.width, sprite.height,
+            projectile.x, projectile.y,
+            projectile.width, projectile.height
+        );
+    });
+
+    monsters.forEach(monster => {
+        let sprite = monster.getSprite();
+        drawingSurface.drawImage(
+            monster.spriteSheet.img,
+            sprite.x, sprite.y,
+            sprite.width, sprite.height,
+            monster.x, monster.y,
+            monster.width, monster.height
+        );
+    });
 }
