@@ -50,12 +50,16 @@ function startgame() {
     spriteSheetHero = new SpriteSheet("assets/img/tank.png", "assets/tank.json", heroLoaded);
     spriteSheetEnemy = new SpriteSheet("assets/img/monster.png", "assets/monster.json", spawnMonster);
     spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", a);
-    
+    spriteSheetLightning = new SpriteSheet("assets/img/lightning.png", "assets/lightning.json", a);
     //começar rondas
     setInterval(() => {
         startRound();
     }, 5000);
-    
+
+
+    setInterval(() => {
+        strikeLighting();
+    }, 5000);
     update();
 
     window.addEventListener("keydown", keyDownHandler, false);
@@ -146,9 +150,26 @@ function detectCollision(entity1, entity2) {
     );
 }
 
+function strikeLighting(){
+    //Manda um raio para um monstro atoa
+    
+    if(monsters.length>0){
+        let i = Math.floor(Math.random() * monsters.length);
+        let monster = monsters[i];
+      
+        lighting= new Projectile(spriteSheetLightning, monster.x, monster.y, null, null, 5, canvas.width, canvas.height, 10);
+        projectiles.push(lighting)
+    
+    }
+
+
+}
+
 function entitiesActions() {
     let removeEntities = [];
 
+
+   
     // HERO
     entities.forEach(entity => {
         if (entity instanceof Hero) {
@@ -165,6 +186,7 @@ function entitiesActions() {
                 entity.move(entity.direction.DOWN);
             }
         }
+
     });
 
     // PROJECTILES ACTIONS
@@ -172,7 +194,10 @@ function entitiesActions() {
         if (projectile.x === projectile.destinyX && projectile.y === projectile.destinyY) {
             removeEntities.push(projectile);
         } else {
-            moveEntity(projectile, projectile.destinyX, projectile.destinyY, projectile.velocity);
+            if(projectile.destinyX!= null){
+
+                moveEntity(projectile, projectile.destinyX, projectile.destinyY, projectile.velocity);
+            }
         }
     });
 
