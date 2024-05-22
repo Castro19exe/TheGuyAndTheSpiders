@@ -1,0 +1,76 @@
+{"frames": {
+
+"ANDAR_01.png":
+{
+	"frame": {"x":0,"y":0,"w":32,"h":25},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":25},
+	"sourceSize": {"w":32,"h":25}
+},
+"ANDAR_02.png":
+{
+	"frame": {"x":32,"y":0,"w":32,"h":25},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":25},
+	"sourceSize": {"w":32,"h":25}
+},
+"ANDAR_03.png":
+{
+	"frame": {"x":64,"y":0,"w":32,"h":25},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":25},
+	"sourceSize": {"w":32,"h":25}
+},
+"ANDAR_04.png":
+{
+	"frame": {"x":96,"y":0,"w":32,"h":25},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":25},
+	"sourceSize": {"w":32,"h":25}
+},
+"MORRER_01.png":
+{
+	"frame": {"x":128,"y":0,"w":32,"h":25},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":25},
+	"sourceSize": {"w":32,"h":25}
+},
+"MORRER_02.png":
+{
+	"frame": {"x":160,"y":0,"w":32,"h":25},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":25},
+	"sourceSize": {"w":32,"h":25}
+},
+"MORRER_03.png":
+{
+	"frame": {"x":192,"y":0,"w":32,"h":25},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":25},
+	"sourceSize": {"w":32,"h":25}
+},
+"MORRER_04.png":
+{
+	"frame": {"x":224,"y":0,"w":32,"h":25},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":25},
+	"sourceSize": {"w":32,"h":25}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "SLIME.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":25},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:3f737493349806ae2ef99d431d9d34bd:79cb128908d8a4d655cec5af568720d8:237e6b84f5359e788e7553ed7f3a2ff3$"
+}
+}

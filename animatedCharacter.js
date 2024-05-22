@@ -8,11 +8,12 @@ let spriteSheetKnife;
 let entities = []; 
 let projectiles = [];
 let monsters = [];
+let powers  =[];
 let activeKeys = new Array(255);
 let isGameStarted = false;
 let button = undefined;
 let round = 1;
-
+let life = 5;
 let keyboard = {
     SPACE: 32,
     LEFT: 65,
@@ -47,15 +48,15 @@ function startgame() {
     let url = './assets/img/background.png';
     canvas.style.background = `url('${url}')`;
     canvas.style.backgroundSize = 'cover';
-    spriteSheetHero = new SpriteSheet("assets/img/tank.png", "assets/tank.json", heroLoaded);
-    spriteSheetEnemy = new SpriteSheet("assets/img/monster.png", "assets/monster.json", spawnMonster);
+    spriteSheetHero = new SpriteSheet("assets/img/hero.png", "assets/hero.json", heroLoaded);
+    
+    spriteSheetEnemy = new SpriteSheet("assets/img/aranha.png", "assets/aranha.json", spawnMonster);
     spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", a);
     spriteSheetLightning = new SpriteSheet("assets/img/lightning.png", "assets/lightning.json", a);
     //começar rondas
     setInterval(() => {
         startRound();
     }, 5000);
-
 
     setInterval(() => {
         strikeLighting();
@@ -99,28 +100,36 @@ function heroLoaded() {
 
 function spawnMonster() {
     const MARGEM = 1000;
+    let enemy;
+
+
     if (hero != null) {
         let x, y;
+
         do {
             x = Math.random() * canvas.width;
             y = Math.random() * canvas.height;
         } while (
             x > (hero.x + hero.width + MARGEM) || x < (hero.x - MARGEM) ||
             y > (hero.y + hero.height + MARGEM) || y < (hero.y - MARGEM)
-        );
+        )
 
-        let enemy = new Monster(spriteSheetEnemy, x, y, 1, canvas.width, canvas.height, 5);
+        enemy = new Monster(spriteSheetEnemy, x, y, 1, canvas.width, canvas.height, life);
         monsters.push(enemy);
     }
 }
 
 function loadMonsters() {
-    let enemysQuantity = round * 5;
+    let enemysQuantity = round + 2;
     let time = 1000;
+
+    if (round % 5 == 0) {
+        life = life * 2;
+    }
 
     for (let i = 0; i < enemysQuantity; i++) {
         setTimeout(spawnMonster, time);
-        time += 500;
+        time += 300;
     }
 }
 
@@ -156,19 +165,13 @@ function strikeLighting(){
     if(monsters.length>0){
         let i = Math.floor(Math.random() * monsters.length);
         let monster = monsters[i];
-      
-        lighting= new Projectile(spriteSheetLightning, monster.x, monster.y, null, null, 5, canvas.width, canvas.height, 10);
-        projectiles.push(lighting)
-    
+        lighting= new Power(spriteSheetLightning, monster.x, monster.y, canvas.width, canvas.height, 10, 250);
+        powers.push(lighting)
     }
-
-
 }
 
 function entitiesActions() {
     let removeEntities = [];
-
-
    
     // HERO
     entities.forEach(entity => {
@@ -189,15 +192,19 @@ function entitiesActions() {
 
     });
 
+    // POWERS ACTIONS
+    powers.forEach(power => {
+        setTimeout(() => {
+            index = powers.indexOf(power);
+            powers.splice(index,1)
+        }, power.time);
+    });
     // PROJECTILES ACTIONS
     projectiles.forEach(projectile => {
         if (projectile.x === projectile.destinyX && projectile.y === projectile.destinyY) {
             removeEntities.push(projectile);
         } else {
-            if(projectile.destinyX!= null){
-
-                moveEntity(projectile, projectile.destinyX, projectile.destinyY, projectile.velocity);
-            }
+            moveEntity(projectile, projectile.destinyX, projectile.destinyY, projectile.velocity);
         }
     });
 
@@ -222,11 +229,23 @@ function entitiesActions() {
                 removeEntities.push(projectile);
             }
         });
+        powers.forEach(power => {
+            if (detectCollision(monster, power)) {
+                monster.life -= power.damage;
+                if (monster.life <= 0) {
+                    removeEntities.push(monster);
+                }
+            }
+        });
     });
 
     // ENTIDADES A REMOVER
     removeEntities.forEach(entity => {
         let index;
+        index = powers.indexOf(entity);
+        if(index >-1){
+            powers.splice(index,1)
+        }
         index = projectiles.indexOf(entity);
         if (index > -1) {
             projectiles.splice(index, 1);
@@ -253,52 +272,37 @@ function keyUpHandler(e) {
     }
 }
 
-
-
 function update() {
     entitiesActions();
-
+    powers.forEach(power => power.update());
     entities.forEach(entity => entity.update());
     projectiles.forEach(projectile => projectile.update());
     monsters.forEach(monster => monster.update());
-
+    /*setTimeout(() => {
+        requestAnimationFrame(update, canvas); 
+    }, 1000/60);*/
     requestAnimationFrame(update, canvas);
     render();
 }
 
 function render() {
     drawingSurface.clearRect(0, 0, canvas.width, canvas.height);
+    allEntities = [];
+    allEntities.push(powers);
+    allEntities.push(entities);
+    allEntities.push(projectiles);
+    allEntities.push(monsters);
 
-    entities.forEach(entity => {
-        let sprite = entity.getSprite();
-        drawingSurface.drawImage(
-            entity.spriteSheet.img,
-            sprite.x, sprite.y,
-            sprite.width, sprite.height,
-            entity.x, entity.y,
-            entity.width, entity.height
-        );
-    });
-
-    projectiles.forEach(projectile => {
-        let sprite = projectile.getSprite();
-        drawingSurface.drawImage(
-            projectile.spriteSheet.img,
-            sprite.x, sprite.y,
-            sprite.width, sprite.height,
-            projectile.x, projectile.y,
-            projectile.width, projectile.height
-        );
-    });
-
-    monsters.forEach(monster => {
-        let sprite = monster.getSprite();
-        drawingSurface.drawImage(
-            monster.spriteSheet.img,
-            sprite.x, sprite.y,
-            sprite.width, sprite.height,
-            monster.x, monster.y,
-            monster.width, monster.height
-        );
+    allEntities.forEach(entities => {
+        entities.forEach(entity => {
+            let sprite = entity.getSprite();
+            drawingSurface.drawImage(
+                entity.spriteSheet.img,
+                sprite.x, sprite.y,
+                sprite.width, sprite.height,
+                entity.x, entity.y,
+                entity.width, entity.height
+                );
+        });
     });
 }
