@@ -4,6 +4,7 @@ let spriteSheetHero;
 let spriteSheetEnemy;
 let spriteSheetButton;
 let spriteSheetKnife;
+let spriteSheetLightning;
 // Entities HEROE + BOTOES etc
 let entities = []; 
 let projectiles = [];
@@ -48,7 +49,7 @@ function startgame() {
     let url = './assets/img/background.png';
     canvas.style.background = `url('${url}')`;
     canvas.style.backgroundSize = 'cover';
-    spriteSheetHero = new SpriteSheet("assets/img/hero.png", "assets/hero.json", heroLoaded);
+    spriteSheetHero = new SpriteSheet("assets/img/tank.png", "assets/tank.json", heroLoaded);
     
     spriteSheetEnemy = new SpriteSheet("assets/img/aranha.png", "assets/aranha.json", spawnMonster);
     spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", a);
@@ -161,11 +162,11 @@ function detectCollision(entity1, entity2) {
 
 function strikeLighting(){
     //Manda um raio para um monstro atoa
-    
     if(monsters.length>0){
         let i = Math.floor(Math.random() * monsters.length);
         let monster = monsters[i];
-        lighting= new Power(spriteSheetLightning, monster.x, monster.y, canvas.width, canvas.height, 10, 250);
+        lighting= new Power(spriteSheetLightning, monster.x , monster.y , canvas.width, canvas.height, 5, 250);
+        lighting.y =   monster.y+(monster.height/2) -lighting.height;
         powers.push(lighting)
     }
 }
