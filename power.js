@@ -1,6 +1,6 @@
 class Power extends Entity 
 {
-    constructor(spriteSheet, x, y, canvasWidth, canvasHeight, damage, time) {
+    constructor(spriteSheet, x, y, canvasWidth, canvasHeight, damage, time, cooldown) {
         super();
         this.states = {
             MOVE: 'MOVE',
@@ -27,6 +27,7 @@ class Power extends Entity
         this.canvasHeight = canvasHeight;
         this.damage = damage;
         this.time = time;
+        this.cooldown = cooldown;
         this.setup();
     }
     

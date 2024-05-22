@@ -54,6 +54,8 @@ function startgame() {
     spriteSheetEnemy = new SpriteSheet("assets/img/aranha.png", "assets/aranha.json", spawnMonster);
     spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", a);
     spriteSheetLightning = new SpriteSheet("assets/img/lightning.png", "assets/lightning.json", a);
+    
+    spriteSheetMolotov = new SpriteSheet("assets/img/molotov.png", "assets/molotov.json", a);
     //começar rondas
     setInterval(() => {
         startRound();
@@ -61,6 +63,11 @@ function startgame() {
 
     setInterval(() => {
         strikeLighting();
+    }, 5000);
+
+
+    setInterval(() => {
+        throwMolotov();
     }, 5000);
     update();
 
@@ -159,15 +166,31 @@ function detectCollision(entity1, entity2) {
         entity1.y + entity1.height > entity2.y
     );
 }
+function throwMolotov(){
+
+    rad=Math.floor(Math.random() * 4);
+    //ira cair a molotov num dos lados do heroi
+    x = hero.x;
+    y = hero.y;
+    margem=100;
+    if(rad==1) x -=margem;
+    if(rad==2) y +=margem;
+    if(rad==3) x +=margem;
+    if(rad==4) x -=margem
+    molotov = new Power(spriteSheetMolotov ,  x , y, canvas.width, canvas.height, 5, 2000, 5000);
+    powers.push(molotov);
+}
+
 
 function strikeLighting(){
     //Manda um raio para um monstro atoa
     if(monsters.length>0){
         let i = Math.floor(Math.random() * monsters.length);
         let monster = monsters[i];
-        lighting= new Power(spriteSheetLightning, monster.x , monster.y , canvas.width, canvas.height, 5, 250);
+        lighting= new Power(spriteSheetLightning, monster.x , monster.y , canvas.width, canvas.height, 5, 250,5000);
         lighting.y =   monster.y+(monster.height/2) -lighting.height;
-        powers.push(lighting)
+        
+        powers.push(lighting);
     }
 }
 
