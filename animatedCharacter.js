@@ -6,6 +6,7 @@ let spriteSheetButton;
 let spriteSheetKnife;
 let spriteSheetLightning;
 // Entities HEROE + BOTOES etc
+let isGameRuning = true;
 let entities = []; 
 let projectiles = [];
 let monsters = [];
@@ -45,7 +46,9 @@ function carregarBotao() {
 function a(){}
 
 function startgame() {
+
     isGameStarted = true;
+    isGameRuning = true;
     let url = './assets/img/background.png';
     canvas.style.background = `url('${url}')`;
     canvas.style.backgroundSize = 'cover';
@@ -59,7 +62,7 @@ function startgame() {
     //começar rondas
     setInterval(() => {
         startRound();
-    }, 5000);
+    }, 1000);
 
     setInterval(() => {
         strikeLighting();
@@ -70,7 +73,7 @@ function startgame() {
         throwMolotov();
     }, 5000);
     update();
-
+    //levelUpMenu();
     window.addEventListener("keydown", keyDownHandler, false);
     window.addEventListener("keyup", keyUpHandler, false);
 }
@@ -91,13 +94,26 @@ function canvasClick(e) {
     let clickedX = e.clientX;
     let clickedY = e.clientY;
 
-    if (isGameStarted) {
+    if (isGameStarted && isGameRuning) {
         // Throw knife
         loadKnife(clickedX, clickedY);
-    } else if (clickedX > button.x && clickedX < button.x + button.width && clickedY > button.y && clickedY < button.y + button.height) {
+    } else if (clickedX > button.x && clickedX < button.x + button.width && clickedY > button.y && clickedY < button.y + button.height && isGameRuning) {
         //CLICOU NO BOTAO
         entities.pop(button);
         startgame();
+    }else if(!isGameRuning){
+        largura = 670; 
+        altura = 354; 
+        xMenu= canvas.width/2-largura/2;
+        yMenu= canvas.height/2- altura/2;
+        if(clickedX > xMenu && clickedX<(xMenu+largura) ){
+            
+
+
+
+            
+            isGameRuning=true;
+        }
     }
 }
 
@@ -126,12 +142,51 @@ function spawnMonster() {
         monsters.push(enemy);
     }
 }
+function levelUpMenu(){
+    console.log("level up")
+    
+    var largura = 670; 
+    var altura = 354; 
+    drawingSurface.lineWidth = 5;  
+    xMenu= canvas.width/2-largura/2;
+    yMenu= canvas.height/2- altura/2;
+    //contorno
+    drawingSurface.strokeStyle = 'black';
+    drawingSurface.beginPath();
+    drawingSurface.rect(xMenu,yMenu,  largura, altura);
+    
+    //quadrado
+    drawingSurface.fillStyle = 'white';
+    drawingSurface.fillRect(xMenu, yMenu, largura, altura );
+    //primeira opçao
+    limite=largura/3;
+    drawingSurface.rect(xMenu,yMenu,  limite, altura);
+    
+    drawingSurface.fillStyle = 'blue';
+    opcao = drawingSurface.fillRect(xMenu,yMenu, limite, altura)
+    
+    
+    //segunda
 
+    largura=limite*2;
+    drawingSurface.rect(xMenu,yMenu,  largura, altura);
+
+    //terceira
+
+
+
+
+    drawingSurface.stroke();
+    //pausar o jogo
+    isGameRuning=false;
+    //
+}
 function loadMonsters() {
     let enemysQuantity = round + 2;
     let time = 1000;
 
     if (round % 5 == 0) {
+        levelUpMenu();
         life = life * 2;
     }
 
@@ -297,16 +352,19 @@ function keyUpHandler(e) {
 }
 
 function update() {
-    entitiesActions();
-    powers.forEach(power => power.update());
-    entities.forEach(entity => entity.update());
-    projectiles.forEach(projectile => projectile.update());
-    monsters.forEach(monster => monster.update());
-    /*setTimeout(() => {
-        requestAnimationFrame(update, canvas); 
-    }, 1000/60);*/
+    if(isGameRuning ){
+        entitiesActions();
+        powers.forEach(power => power.update());
+        entities.forEach(entity => entity.update());
+        projectiles.forEach(projectile => projectile.update());
+        monsters.forEach(monster => monster.update());
+        /*setTimeout(() => {
+            requestAnimationFrame(update, canvas); 
+        }, 1000/60);*/
+        render();
+    }
+    
     requestAnimationFrame(update, canvas);
-    render();
 }
 
 function render() {
