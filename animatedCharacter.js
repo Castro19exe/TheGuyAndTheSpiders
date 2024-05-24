@@ -24,6 +24,15 @@ let keyboard = {
     DOWN: 83
 };
 
+let knifeDamage=1;
+let molotovDamage=0;
+let lightingDamage=0;
+let upgrade1, upgrade2, upgrade3;
+
+
+let lightingIsInTimeout = false;
+let molotovIsInTimeout = false;
+
 window.addEventListener("load", init, false);
 
 function init() {
@@ -61,19 +70,13 @@ function startgame() {
     spriteSheetMolotov = new SpriteSheet("assets/img/molotov.png", "assets/molotov.json", a);
     //começar rondas
     setInterval(() => {
-        startRound();
+        if(isGameRuning){
+            startRound();
+        }
     }, 1000);
 
-    setInterval(() => {
-        strikeLighting();
-    }, 5000);
-
-
-    setInterval(() => {
-        throwMolotov();
-    }, 5000);
+    
     update();
-    //levelUpMenu();
     window.addEventListener("keydown", keyDownHandler, false);
     window.addEventListener("keyup", keyUpHandler, false);
 }
@@ -86,7 +89,7 @@ function startRound() {
 }
 
 function loadKnife(x, y) {
-    let knife = new Projectile(spriteSheetKnife, hero.x, hero.y, x, y, 5, canvas.width, canvas.height, 3);
+    let knife = new Projectile(spriteSheetKnife, hero.x, hero.y, x, y, 5, canvas.width, canvas.height, knifeDamage);
     projectiles.push(knife);
 }
 
@@ -102,15 +105,29 @@ function canvasClick(e) {
         entities.pop(button);
         startgame();
     }else if(!isGameRuning){
-        largura = 670; 
-        altura = 354; 
-        xMenu= canvas.width/2-largura/2;
+        largura = 300; 
+        altura = 354;
+        xMenu= canvas.width/2-largura/2- largura;
         yMenu= canvas.height/2- altura/2;
-        if(clickedX > xMenu && clickedX<(xMenu+largura) ){
-            
+        if(clickedX > xMenu && clickedX<(xMenu+largura*3) &&clickedY>yMenu && clickedY<yMenu+altura  ){
+            var chosenUpgrade;
+            if(clickedX<xMenu+largura){
+                chosenUpgrade = upgrade1;
+            }
+            else if(clickedX<xMenu + largura*2){
+                chosenUpgrade = upgrade2;
+            }
+            else{
+                chosenUpgrade  =upgrade3;
+            }
 
-
-
+            if(chosenUpgrade.hasOwnProperty('lightingDamage')) {
+                lightingDamage += chosenUpgrade['lightingDamage'];
+            } else if (chosenUpgrade.hasOwnProperty('molotovDamage')) {
+                molotovDamage += chosenUpgrade['molotovDamage'];
+            } else if (chosenUpgrade.hasOwnProperty('knifeDamage')) {
+                knifeDamage += chosenUpgrade['knifeDamage'];
+            }
             
             isGameRuning=true;
         }
@@ -145,39 +162,106 @@ function spawnMonster() {
 function levelUpMenu(){
     console.log("level up")
     
-    var largura = 670; 
+    let upgrades = new Map();
+
+    function upgradeDamage(type, damage) {
+        if (damage == 0) {
+            upgrades.set(type, damage + 1);
+        } else {
+            let rad = Math.ceil(Math.random() * round);
+            upgrades.set(type, damage + rad);
+        }
+    }
+
+    upgradeDamage('lightingDamage', lightingDamage);
+    upgradeDamage('molotovDamage', molotovDamage);
+
+    let rad = Math.ceil(Math.random() * round);
+    upgrades.set('knifeDamage', knifeDamage + rad);
+
+    function getRandomUpgrade(upgradesMap) {
+        let keys = Array.from(upgradesMap.keys());
+        let randomIndex = Math.floor(Math.random() * keys.length);
+        let type = keys[randomIndex];
+        let value = upgradesMap.get(type);
+        let upgrade = {};
+        upgrade[type] = value;
+        return upgrade;
+    }
+    
+    upgrade1 = getRandomUpgrade(upgrades);
+    upgrade2 = getRandomUpgrade(upgrades);
+    upgrade3 = getRandomUpgrade(upgrades);
+    
+    
+
+    function desenharQuadrado(x,y , largura, altura, texto, cor){
+        
+        drawingSurface.lineWidth = 5; 
+        drawingSurface.strokeStyle = 'black';
+        drawingSurface.beginPath();
+        drawingSurface.rect(x,y,  largura, altura);
+        drawingSurface.stroke();
+        drawingSurface.fillStyle = cor;
+        
+        drawingSurface.fillRect(x, y, largura, altura );
+
+        drawingSurface.fillStyle = 'black';
+        drawingSurface.font = '20px Arial';
+        drawingSurface.fillText(texto, (x+10), y+altura/2 );
+    }
+
+   
+    function texto(upgrade){
+        if(upgrade.hasOwnProperty('lightingDamage')) {
+            if(upgrade['lightingDamage'] === 1) {
+                return "Desbloquear: Lançar raios";
+            } else {
+                return "Aumentar dano de raio em " + upgrade['lightingDamage'];
+            }
+        } else if (upgrade.hasOwnProperty('molotovDamage')) {
+            if(upgrade['molotovDamage'] === 1) {
+                return "Desbloquear: Lançar molotovs";
+            } else {
+                return "Aumentar dano de molotov em " + upgrade['molotovDamage'];
+            }
+        } else if (upgrade.hasOwnProperty('knifeDamage')) {
+            return "Aumentar o dano da faca em " + upgrade['knifeDamage'];
+        }
+    }
+    
+
+
+
+    cor= "White"
+    text = texto(upgrade2);
+    if(text.includes("Desbloquear")) cor = "Purple"
+     
+    var largura = 300; 
     var altura = 354; 
-    drawingSurface.lineWidth = 5;  
-    xMenu= canvas.width/2-largura/2;
-    yMenu= canvas.height/2- altura/2;
-    //contorno
-    drawingSurface.strokeStyle = 'black';
-    drawingSurface.beginPath();
-    drawingSurface.rect(xMenu,yMenu,  largura, altura);
+    //quadrado Meio
+    x= canvas.width/2-largura/2;
+    y = canvas.height/2- altura/2;
+
+    desenharQuadrado(x,y,largura,altura, texto(upgrade2), cor)
+    //primeiro
     
-    //quadrado
-    drawingSurface.fillStyle = 'white';
-    drawingSurface.fillRect(xMenu, yMenu, largura, altura );
-    //primeira opçao
-    limite=largura/3;
-    drawingSurface.rect(xMenu,yMenu,  limite, altura);
+    cor= "White"
+    text = texto(upgrade1);
+    if(text.includes("Desbloquear")) cor = "Purple"
     
-    drawingSurface.fillStyle = 'blue';
-    opcao = drawingSurface.fillRect(xMenu,yMenu, limite, altura)
+
+    desenharQuadrado((x-largura),y,largura,altura, texto(upgrade1), cor)
+    cor= "White"
+    text = texto(upgrade3);
+    if(text.includes("Desbloquear")) cor = "Purple"
     
-    
-    //segunda
-
-    largura=limite*2;
-    drawingSurface.rect(xMenu,yMenu,  largura, altura);
-
-    //terceira
-
-
-
-
-    drawingSurface.stroke();
+    //utlimo
+    desenharQuadrado((x= x+largura),y,largura,altura, texto(upgrade3), cor)
+ 
     //pausar o jogo
+
+    
     isGameRuning=false;
     //
 }
@@ -232,7 +316,7 @@ function throwMolotov(){
     if(rad==2) y +=margem;
     if(rad==3) x +=margem;
     if(rad==4) x -=margem
-    molotov = new Power(spriteSheetMolotov ,  x , y, canvas.width, canvas.height, 5, 2000, 5000);
+    molotov = new Power(spriteSheetMolotov ,  x , y, canvas.width, canvas.height, molotovDamage, 2000, 5000);
     powers.push(molotov);
 }
 
@@ -242,7 +326,7 @@ function strikeLighting(){
     if(monsters.length>0){
         let i = Math.floor(Math.random() * monsters.length);
         let monster = monsters[i];
-        lighting= new Power(spriteSheetLightning, monster.x , monster.y , canvas.width, canvas.height, 5, 250,5000);
+        lighting= new Power(spriteSheetLightning, monster.x , monster.y , canvas.width, canvas.height, lightingDamage, 250,5000);
         lighting.y =   monster.y+(monster.height/2) -lighting.height;
         
         powers.push(lighting);
@@ -353,6 +437,22 @@ function keyUpHandler(e) {
 
 function update() {
     if(isGameRuning ){
+        
+        if (!lightingIsInTimeout && lightingDamage!=0) {
+            setTimeout(() => {
+                strikeLighting();
+                lightingIsInTimeout = false; 
+            }, 5000);
+            lightingIsInTimeout = true; 
+        }
+        if (!molotovIsInTimeout && molotovDamage!=0) {
+            setTimeout(() => {
+                throwMolotov();
+                molotovIsInTimeout = false; 
+            }, 5000);
+            molotovIsInTimeout = true; 
+        }
+
         entitiesActions();
         powers.forEach(power => power.update());
         entities.forEach(entity => entity.update());
