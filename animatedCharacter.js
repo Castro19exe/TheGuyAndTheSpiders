@@ -33,6 +33,11 @@ let upgrade1, upgrade2, upgrade3;
 let lightingIsInTimeout = false;
 let molotovIsInTimeout = false;
 
+let background;
+let spriteSheetBack;
+let gameWorld;
+let camera;
+
 window.addEventListener("load", init, false);
 
 function init() {
@@ -40,8 +45,20 @@ function init() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     drawingSurface = canvas.getContext("2d");
+	gameWorld = new Entity();
+	gameWorld.width = canvas.width;
+	gameWorld.height = canvas.height;
+	gameWorld.x = 0;
+	gameWorld.y = 0;
+
+	camera = new Camera(0, gameWorld.height / 2, 
+		Math.floor(gameWorld.width), gameWorld.height / 2);
+
 
     // Menu
+    spriteSheetBack = new SpriteSheet("assets/img/background.png","assets/background.json", spriteLoaded);
+
+    
     spriteSheetButton = new SpriteSheet("assets/img/btnPlay.png", "assets/button.json", carregarBotao);
     canvas.addEventListener("click", canvasClick);
 }
@@ -52,22 +69,27 @@ function carregarBotao() {
     entities.push(button);
     update();
 }
-function a(){}
+
+function spriteLoaded() {
+	
+}
 
 function startgame() {
 
+    background = new Background(spriteSheetBack, 0, 0);
+    entities.push(background); 
     isGameStarted = true;
     isGameRuning = true;
-    let url = './assets/img/background.png';
+    /*let url = './assets/img/background.png';
     canvas.style.background = `url('${url}')`;
-    canvas.style.backgroundSize = 'cover';
+    canvas.style.backgroundSize = 'cover';*/
     spriteSheetHero = new SpriteSheet("assets/img/tank.png", "assets/tank.json", heroLoaded);
     
     spriteSheetEnemy = new SpriteSheet("assets/img/aranha.png", "assets/aranha.json", spawnMonster);
-    spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", a);
-    spriteSheetLightning = new SpriteSheet("assets/img/lightning.png", "assets/lightning.json", a);
+    spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", spriteLoaded);
+    spriteSheetLightning = new SpriteSheet("assets/img/lightning.png", "assets/lightning.json", spriteLoaded);
     
-    spriteSheetMolotov = new SpriteSheet("assets/img/molotov.png", "assets/molotov.json", a);
+    spriteSheetMolotov = new SpriteSheet("assets/img/molotov.png", "assets/molotov.json", spriteLoaded);
     //começar rondas
     setInterval(() => {
         if(isGameRuning){
@@ -470,8 +492,8 @@ function update() {
 function render() {
     drawingSurface.clearRect(0, 0, canvas.width, canvas.height);
     allEntities = [];
+    allEntities.push(entities); 
     allEntities.push(powers);
-    allEntities.push(entities);
     allEntities.push(projectiles);
     allEntities.push(monsters);
 
