@@ -2,10 +2,13 @@ let canvas;
 let drawingSurface;
 let spriteSheetHero;
 let spriteSheetEnemy;
-let spriteSheetButton;
+let spriteSheetTitle;
+let spriteSheetButtonLevel1;
+let spriteSheetButtonLevel2;
 let spriteSheetKnife;
 let spriteSheetLightning;
-// Entities HEROE + BOTOES etc
+
+// Entities
 let isGameRuning = true;
 let entities = []; 
 let projectiles = [];
@@ -13,9 +16,12 @@ let monsters = [];
 let powers  =[];
 let activeKeys = new Array(255);
 let isGameStarted = false;
-let button = undefined;
+let title = undefined;
+let buttonLevel1 = undefined;
+let buttonLevel2 = undefined;
 let round = 1;
-let life = 5;
+let life = 5; //monster life
+let damageCooldown = 300;
 let keyboard = {
     SPACE: 32,
     LEFT: 65,
@@ -52,59 +58,65 @@ function init() {
 	gameWorld.y = 0;
 
 	camera = new Camera(0, gameWorld.height / 2, 
-		Math.floor(gameWorld.width), gameWorld.height / 2);
-
+	Math.floor(gameWorld.width), gameWorld.height / 2);
 
     // Menu
     spriteSheetBack = new SpriteSheet("assets/img/background.png","assets/background.json", spriteLoaded);
-
-    
-    spriteSheetButton = new SpriteSheet("assets/img/btnPlay.png", "assets/button.json", carregarBotao);
+    spriteSheetTitle = new SpriteSheet("assets/img/title.png", "assets/title.json", titleLoaded);
+    spriteSheetButtonLevel1 = new SpriteSheet("assets/img/btnMenu1.png", "assets/buttonLevel1.json", buttonLevel1Loaded);
+    spriteSheetButtonLevel2 = new SpriteSheet("assets/img/btnMenu2.png", "assets/buttonLevel2.json", buttonLevel2Loaded);
     canvas.addEventListener("click", canvasClick);
 }
 
-// MENU
-function carregarBotao() {
-    button = new Button(spriteSheetButton, canvas.width * 0.5 - 128, canvas.height * 0.5 - 258 * 0.5, canvas.width, canvas.height);
-    entities.push(button);
+function titleLoaded() {
+    title = new Title(spriteSheetTitle, canvas.width * 0.5 - 405.5, canvas.height * 0.5 - 608 * 0.5, canvas.width, canvas.height);
+    entities.push(title);
     update();
 }
 
-function spriteLoaded() {
-	
+function buttonLevel1Loaded() {
+    buttonLevel1 = new ButtonLevel1(spriteSheetButtonLevel1, canvas.width * 0.5 - 250, canvas.height * 0.5 - 258 * 0.5, canvas.width, canvas.height);
+    entities.push(buttonLevel1);
+    update();
 }
 
-function startgame() {
+function buttonLevel2Loaded() {
+    buttonLevel2 = new ButtonLevel2(spriteSheetButtonLevel2, canvas.width * 0.5 - 250, canvas.height * 0.5 - 8 * 0.5, canvas.width, canvas.height);
+    entities.push(buttonLevel2);
+    update();
+}
 
+function spriteLoaded() { }
+
+function startgame() {
     background = new Background(spriteSheetBack, 0, 0);
     entities.push(background); 
     isGameStarted = true;
     isGameRuning = true;
-    /*let url = './assets/img/background.png';
-    canvas.style.background = `url('${url}')`;
-    canvas.style.backgroundSize = 'cover';*/
+
     spriteSheetHero = new SpriteSheet("assets/img/tank.png", "assets/tank.json", heroLoaded);
-    
+
     spriteSheetEnemy = new SpriteSheet("assets/img/aranha.png", "assets/aranha.json", spawnMonster);
     spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", spriteLoaded);
     spriteSheetLightning = new SpriteSheet("assets/img/lightning.png", "assets/lightning.json", spriteLoaded);
     
     spriteSheetMolotov = new SpriteSheet("assets/img/molotov.png", "assets/molotov.json", spriteLoaded);
+
     //começar rondas
     setInterval(() => {
         if(isGameRuning){
             startRound();
         }
     }, 1000);
-
     
     update();
+    
     window.addEventListener("keydown", keyDownHandler, false);
     window.addEventListener("keyup", keyUpHandler, false);
 }
 
 function startRound() {
-    if (monsters.length ==0) {
+    if (monsters.length == 0) {
         loadMonsters();
         round++;
     }
@@ -122,9 +134,9 @@ function canvasClick(e) {
     if (isGameStarted && isGameRuning) {
         // Throw knife
         loadKnife(clickedX, clickedY);
-    } else if (clickedX > button.x && clickedX < button.x + button.width && clickedY > button.y && clickedY < button.y + button.height && isGameRuning) {
+    } else if (clickedX > buttonLevel1.x && clickedX < buttonLevel1.x + buttonLevel1.width && clickedY > buttonLevel1.y && clickedY < buttonLevel1.y + buttonLevel1.height && isGameRuning) {
         //CLICOU NO BOTAO
-        entities.pop(button);
+        entities.pop(buttonLevel1);
         startgame();
     }else if(!isGameRuning){
         largura = 300; 
@@ -162,9 +174,8 @@ function heroLoaded() {
 }
 
 function spawnMonster() {
-    const MARGEM = 1000;
+    const MARGEM = 3000;
     let enemy;
-
 
     if (hero != null) {
         let x, y;
@@ -173,14 +184,15 @@ function spawnMonster() {
             x = Math.random() * canvas.width;
             y = Math.random() * canvas.height;
         } while (
-            x > (hero.x + hero.width + MARGEM) || x < (hero.x - MARGEM) ||
-            y > (hero.y + hero.height + MARGEM) || y < (hero.y - MARGEM)
+            x > (hero.x + hero.width + MARGEM) && x < (hero.x - MARGEM) &&
+            y > (hero.y + hero.height + MARGEM) && y < (hero.y - MARGEM)
         )
 
         enemy = new Monster(spriteSheetEnemy, x, y, 1, canvas.width, canvas.height, life);
         monsters.push(enemy);
     }
 }
+
 function levelUpMenu(){
     console.log("level up")
     
@@ -214,8 +226,6 @@ function levelUpMenu(){
     upgrade1 = getRandomUpgrade(upgrades);
     upgrade2 = getRandomUpgrade(upgrades);
     upgrade3 = getRandomUpgrade(upgrades);
-    
-    
 
     function desenharQuadrado(x,y , largura, altura, texto, cor){
         
@@ -251,9 +261,6 @@ function levelUpMenu(){
             return "Aumentar o dano da faca em " + upgrade['knifeDamage'];
         }
     }
-    
-
-
 
     cor= "White"
     text = texto(upgrade2);
@@ -287,6 +294,7 @@ function levelUpMenu(){
     isGameRuning=false;
     //
 }
+
 function loadMonsters() {
     let enemysQuantity = round + 2;
     let time = 1000;
@@ -384,6 +392,7 @@ function entitiesActions() {
             powers.splice(index,1)
         }, power.time);
     });
+
     // PROJECTILES ACTIONS
     projectiles.forEach(projectile => {
         if (projectile.x === projectile.destinyX && projectile.y === projectile.destinyY) {
@@ -396,10 +405,19 @@ function entitiesActions() {
     // MONSTER ACTIONS
     monsters.forEach(monster => {
         moveEntity(monster, hero.x, hero.y, monster.velocity);
-        if (detectCollision(monster, hero)) {
-            //alert("MORRESTE");
 
-            //tirar vida ao heroi aqui
+        let currentTime = Date.now();
+
+        if (detectCollision(monster, hero)) {
+            if (currentTime - hero.lastDamageTime >= damageCooldown) {
+                hero.life--;
+                hero.lastDamageTime = currentTime;
+                console.log(`Vida do herói: ${hero.life}`);
+
+                if (hero.life <= 0) {
+                    alert("GAME OVER!");
+                }
+            }
         }
     });
 
@@ -458,8 +476,7 @@ function keyUpHandler(e) {
 }
 
 function update() {
-    if(isGameRuning ){
-        
+    if(isGameRuning ) {
         if (!lightingIsInTimeout && lightingDamage!=0) {
             setTimeout(() => {
                 strikeLighting();
@@ -491,6 +508,7 @@ function update() {
 
 function render() {
     drawingSurface.clearRect(0, 0, canvas.width, canvas.height);
+    
     allEntities = [];
     allEntities.push(entities); 
     allEntities.push(powers);

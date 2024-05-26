@@ -1,4 +1,4 @@
-class Button extends Entity 
+class ButtonLevel2 extends Entity 
 {
     constructor(spriteSheet, x, y, canvasWidth, canvasHeight) {
         super();

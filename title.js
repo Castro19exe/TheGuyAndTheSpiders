@@ -1,4 +1,4 @@
-class Hero extends Entity 
+class Title extends Entity 
 {
     constructor(spriteSheet, x, y, canvasWidth, canvasHeight) {
         super();
@@ -23,8 +23,6 @@ class Hero extends Entity
         this.currentFrame = 0;
         this.vx = 3;
         this.vy = 3;
-        this.life = 100;
-        this.lastDamageTime = 0;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
         this.setup();
@@ -39,44 +37,13 @@ class Hero extends Entity
     getSprite() {
         return this.frames[this.currentFrame];
     }
-    
+   
     setup() {
-        this.eStates.MOVE = this.spriteSheet.getStats('ANDAR');
-        this.eStates.SHOOT = this.spriteSheet.getStats('DISPARAR');
         this.eStates.STOPPED = this.spriteSheet.getStats('PARADO');
-        this.eStates.HIT = this.spriteSheet.getStats('ATINGIDO');
 
         this.frames = this.eStates[this.currentState];
         this.width = this.frames[0].width;
         this.height = this.frames[0].height;
-    }
-    
-    move(direction) {
-        this.toggleState(this.states.MOVE);
-        
-        switch (direction)
-        {
-        case this.direction.LEFT:
-            this.x -= this.x - this.vx >= 0 ? this.vx : 0;
-            break;
-        case this.direction.RIGHT:
-            this.x += this.x + this.vx <= this.canvasWidth - this.width ? this.vx : 0;
-            break;
-        case this.direction.UP:
-            this.y -= this.y - this.vy >= 0 ? this.vy : 0;
-            break;
-        case this.direction.DOWN:
-            this.y += this.y + this.vy <= this.canvasHeight - this.height ? this.vy : 0;
-            break;
-        }
-    }
-    
-    stop() {
-        this.toggleState(this.states.STOPPED);
-    }
-    
-    shoot() {
-        this.toggleState(this.states.SHOOT);
     }
 
     toggleState(newState) {
@@ -85,5 +52,5 @@ class Hero extends Entity
         this.currentState = newState;
         this.frames = this.eStates[this.currentState];
         this.currentFrame = 0;
-    } 
+    }
 }
