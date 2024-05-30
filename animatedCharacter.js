@@ -503,7 +503,10 @@ function update() {
         render();
     }
     
-    requestAnimationFrame(update, canvas);
+    setTimeout(() => {
+        requestAnimationFrame(update, canvas); 
+    }, 1000/60); 
+    
 }
 
 function render() {
