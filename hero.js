@@ -23,7 +23,7 @@ class Hero extends Entity
         this.currentFrame = 0;
         this.vx = 3;
         this.vy = 3;
-        this.life = 100;
+        this.life = 25;
         this.lastDamageTime = 0;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
