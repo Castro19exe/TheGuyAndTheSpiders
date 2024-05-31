@@ -51,6 +51,7 @@ let deadSpiders;
 window.addEventListener("load", init, false);
 
 function init() {
+    
     canvas = document.querySelector("canvas");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -61,6 +62,12 @@ function init() {
 	gameWorld.x = 0;
 	gameWorld.y = 0;
 
+    var audio = new Audio('assets/audio/music.mp3');
+    audio.loop = true;
+
+    audio.addEventListener('canplaythrough', function() {
+    audio.play();
+    });
 	camera = new Camera(0, gameWorld.height / 2, Math.floor(gameWorld.width), gameWorld.height / 2);
 
     spriteSheetBack = new SpriteSheet("assets/img/background.png","assets/background.json", spriteLoaded);
@@ -94,11 +101,6 @@ function buttonLevel2Loaded() {
 function spriteLoaded() { }
 
 function startgame() {
-
-   /* var audio = new Audio('audio.mp3');
-    audio.addEventListener('canplaythrough', function() {
-    audio.play();
-    });*/
     background = new Background(spriteSheetBack, 0, 0);
     entities.push(background); 
     isGameStarted = true;
@@ -250,7 +252,7 @@ function spawnMonster() {
     }
 }
 function die(){
-
+    playAudio("youDied.mp3")
     
     largura = 500;
     altura = 100;
@@ -280,7 +282,7 @@ function die(){
     asdasda=asdasdad213
 }
 function levelUpMenu(){
-    
+    playAudio("levelUp.mp3")
     let upgrades = new Map();
 
     function upgradeDamage(type, damage) {
