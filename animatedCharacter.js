@@ -520,7 +520,6 @@ function entitiesActions() {
             if (currentTime - hero.lastDamageTime >= damageCooldown) {
                 hero.life--;
                 hero.lastDamageTime = currentTime;
-                console.log(`Vida do herói: ${hero.life}`);
 
                 if (hero.life <= 0) {
                    die();

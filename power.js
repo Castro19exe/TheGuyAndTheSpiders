@@ -52,39 +52,4 @@ class Power extends Entity
         this.height = this.frames[0].height;
     }
     
-    move(direction) {
-        this.toggleState(this.states.MOVE);
-        
-        switch (direction)
-        {
-        case this.direction.LEFT:
-            this.x -= this.x - this.vx >= 0 ? this.vx : 0;
-            break;
-        case this.direction.RIGHT:
-            this.x += this.x + this.vx <= this.canvasWidth - this.width ? this.vx : 0;
-            break;
-        case this.direction.UP:
-            this.y -= this.y - this.vy >= 0 ? this.vy : 0;
-            break;
-        case this.direction.DOWN:
-            this.y += this.y + this.vy <= this.canvasHeight - this.height ? this.vy : 0;
-            break;
-        }
-    }
-    
-    stop() {
-        this.toggleState(this.states.STOPPED);
-    }
-    
-    shoot() {
-        this.toggleState(this.states.SHOOT);
-    }
-
-    toggleState(newState) {
-        if (this.currentState === newState)
-        return;
-        this.currentState = newState;
-        this.frames = this.eStates[this.currentState];
-        this.currentFrame = 0;
-    } 
 }
