@@ -94,6 +94,11 @@ function buttonLevel2Loaded() {
 function spriteLoaded() { }
 
 function startgame() {
+
+   /* var audio = new Audio('audio.mp3');
+    audio.addEventListener('canplaythrough', function() {
+    audio.play();
+    });*/
     background = new Background(spriteSheetBack, 0, 0);
     entities.push(background); 
     isGameStarted = true;
@@ -160,8 +165,15 @@ function startRoundLevelTwo() {
         round++;
     }
 }
-
+function playAudio(audiofile){
+    path = 'assets/audio/'+ audiofile;
+    var audio = new Audio(path);
+    audio.addEventListener('canplaythrough', function() {
+    audio.play();
+    });
+}
 function loadKnife(x, y) {
+    playAudio("knife.mp3")
     let knife = new Projectile(spriteSheetKnife, hero.x, hero.y, x, y, 5, canvas.width, canvas.height, knifeDamage);
     knife.rotation = 0;
     projectiles.push(knife);
@@ -425,7 +437,7 @@ function detectCollision(entity1, entity2) {
     );
 }
 function throwMolotov(){
-
+    playAudio("fire.mp3")
     rad=Math.floor(Math.random() * 4);
     //ira cair a molotov num dos lados do heroi
     x = hero.x;
@@ -443,6 +455,7 @@ function throwMolotov(){
 function strikeLighting(){
     //Manda um raio para um monstro atoa
     if(monsters.length>0){
+        playAudio("lightning.mp3")
         let i = Math.floor(Math.random() * monsters.length);
         let monster = monsters[i];
         lighting= new Power(spriteSheetLightning, monster.x , monster.y , canvas.width, canvas.height, lightingDamage, 250,5000);
