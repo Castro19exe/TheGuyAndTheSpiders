@@ -124,6 +124,7 @@ function startRound() {
 
 function loadKnife(x, y) {
     let knife = new Projectile(spriteSheetKnife, hero.x, hero.y, x, y, 5, canvas.width, canvas.height, knifeDamage);
+    knife.rotation = 0;
     projectiles.push(knife);
 }
 
@@ -200,7 +201,7 @@ function die(){
     altura = 100;
     x = canvas.width/2 -largura/2;
     y= canvas.height/2 -altura/2;
-
+    
     drawingSurface.lineWidth = 5; 
     drawingSurface.strokeStyle = 'black';
     drawingSurface.beginPath();
@@ -209,18 +210,17 @@ function die(){
     drawingSurface.fillStyle = "black";
     
     drawingSurface.fillRect(x, y, largura, altura );
-
+    
     drawingSurface.fillStyle = 'red';
     drawingSurface.font = '40px Arial';
     drawingSurface.fillText("Morreste!", (x+largura/2)-80, y+altura/2 );
-
+    
     drawingSurface.font = '20px Arial';
     drawingSurface.fillText("Mataste "+ deadSpiders+ " aranhas", (x+largura/2)-80, y+altura/2+20);
-    isGameRuning=false;
     
+    isGameRuning=false;
 
     //erro proposital
-
     asdasda=asdasdad213
 }
 function levelUpMenu(){
@@ -395,6 +395,10 @@ function strikeLighting(){
 function entitiesActions() {
     let removeEntities = [];
    
+
+
+    
+
     // HERO
     entities.forEach(entity => {
         if (entity instanceof Hero) {
@@ -424,6 +428,11 @@ function entitiesActions() {
 
     // PROJECTILES ACTIONS
     projectiles.forEach(projectile => {
+        if (projectile.spriteSheet === spriteSheetKnife) {
+            //rotaçao faca
+            projectile.rotation += 0.1; 
+        }
+
         if (projectile.x === projectile.destinyX && projectile.y === projectile.destinyY) {
             removeEntities.push(projectile);
         } else {
@@ -550,14 +559,31 @@ function render() {
 
     allEntities.forEach(entities => {
         entities.forEach(entity => {
-            let sprite = entity.getSprite();
-            drawingSurface.drawImage(
-                entity.spriteSheet.img,
-                sprite.x, sprite.y,
-                sprite.width, sprite.height,
-                entity.x, entity.y,
-                entity.width, entity.height
+            if (entity instanceof Projectile && entity.spriteSheet === spriteSheetKnife) {
+                drawingSurface.save(); 
+                drawingSurface.translate(entity.x + entity.width / 2, entity.y + entity.height / 2); 
+                drawingSurface.rotate(entity.rotation); 
+                
+                let sprite = entity.getSprite();
+                drawingSurface.drawImage(
+                    entity.spriteSheet.img,
+                    sprite.x, sprite.y,
+                    sprite.width, sprite.height,
+                    -entity.width / 2, -entity.height / 2,
+                    entity.width, entity.height
                 );
+
+                drawingSurface.restore(); 
+            } else {
+                let sprite = entity.getSprite();
+                drawingSurface.drawImage(
+                    entity.spriteSheet.img,
+                    sprite.x, sprite.y,
+                    sprite.width, sprite.height,
+                    entity.x, entity.y,
+                    entity.width, entity.height
+                );
+            }
         });
     });
 }
