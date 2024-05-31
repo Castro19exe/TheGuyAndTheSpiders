@@ -1,0 +1,10 @@
+{"frames": {
+	"UNIQUE_01.png": {
+		"frame": {"x":0,"y":0,"w":2000,"h":2000},
+		"rotated": false,
+		"trimmed": false,
+		"spriteSourceSize": {"x":0,"y":0,"w":2000,"h":2000},
+		"sourceSize": {"w":2000,"h":2000}
+	}
+}
+}

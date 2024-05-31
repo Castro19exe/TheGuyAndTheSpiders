@@ -35,15 +35,19 @@ let molotovDamage=0;
 let lightingDamage=0;
 let upgrade1, upgrade2, upgrade3;
 
-
 let lightingIsInTimeout = false;
 let molotovIsInTimeout = false;
 
-let background;
 let spriteSheetBack;
+let spriteSheetBackLevel2;
+
+let background;
+let backgroundLevel2;
+
 let gameWorld;
 let camera;
 let deadSpiders;
+
 window.addEventListener("load", init, false);
 
 function init() {
@@ -57,11 +61,12 @@ function init() {
 	gameWorld.x = 0;
 	gameWorld.y = 0;
 
-	camera = new Camera(0, gameWorld.height / 2, 
-	Math.floor(gameWorld.width), gameWorld.height / 2);
+	camera = new Camera(0, gameWorld.height / 2, Math.floor(gameWorld.width), gameWorld.height / 2);
 
-    // Menu
     spriteSheetBack = new SpriteSheet("assets/img/background.png","assets/background.json", spriteLoaded);
+    spriteSheetBackLevel2 = new SpriteSheet("assets/img/backgroundLevel2.jpg","assets/backgroundLevel2.json", spriteLoaded);
+
+    // MENU
     spriteSheetTitle = new SpriteSheet("assets/img/title.png", "assets/title.json", titleLoaded);
     spriteSheetButtonLevel1 = new SpriteSheet("assets/img/btnMenu1.png", "assets/buttonLevel1.json", buttonLevel1Loaded);
     spriteSheetButtonLevel2 = new SpriteSheet("assets/img/btnMenu2.png", "assets/buttonLevel2.json", buttonLevel2Loaded);
@@ -102,7 +107,7 @@ function startgame() {
     
     spriteSheetMolotov = new SpriteSheet("assets/img/molotov.png", "assets/molotov.json", spriteLoaded);
 
-    //começar rondas
+    //começar rondas do primeiro nivel
     setInterval(() => {
         if(isGameRuning){
             startRound();
@@ -115,9 +120,43 @@ function startgame() {
     window.addEventListener("keyup", keyUpHandler, false);
 }
 
+function startGameLevelTwo() {
+    backgroundLevel2 = new BackgroundLevel2(spriteSheetBackLevel2, 0, 0);
+    entities.push(backgroundLevel2); 
+    isGameStarted = true;
+    isGameRuning = true;
+    deadSpiders = 0;
+    spriteSheetHero = new SpriteSheet("assets/img/tank.png", "assets/tank.json", heroLoaded);
+
+    spriteSheetEnemy = new SpriteSheet("assets/img/aranha.png", "assets/aranha.json", spawnMonster);
+    spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", spriteLoaded);
+    spriteSheetLightning = new SpriteSheet("assets/img/lightning.png", "assets/lightning.json", spriteLoaded);
+    
+    spriteSheetMolotov = new SpriteSheet("assets/img/molotov.png", "assets/molotov.json", spriteLoaded);
+
+    //começar rondas do segundo nivel
+    setInterval(() => {
+        if(isGameRuning){
+            startRoundLevelTwo();
+        }
+    }, 500);
+    
+    update();
+    
+    window.addEventListener("keydown", keyDownHandler, false);
+    window.addEventListener("keyup", keyUpHandler, false);
+}
+
 function startRound() {
     if (monsters.length == 0) {
         loadMonsters();
+        round++;
+    }
+}
+
+function startRoundLevelTwo() {
+    if (monsters.length == 0) {
+        loadHarderMonsters();
         round++;
     }
 }
@@ -139,7 +178,11 @@ function canvasClick(e) {
         //CLICOU NO BOTAO
         entities.pop(buttonLevel1);
         startgame();
-    }else if(!isGameRuning){
+    } else if (clickedX > buttonLevel2.x && clickedX < buttonLevel2.x + buttonLevel2.width && clickedY > buttonLevel2.y && clickedY < buttonLevel2.y + buttonLevel2.height && isGameRuning) {
+        //CLICOU NO BOTAO DO SEGUNDO NIVEL
+        entities.pop(buttonLevel2);
+        startGameLevelTwo();
+    } else if(!isGameRuning){
         largura = 300; 
         altura = 354;
         xMenu= canvas.width/2-largura/2- largura;
@@ -201,7 +244,7 @@ function die(){
     altura = 100;
     x = canvas.width/2 -largura/2;
     y= canvas.height/2 -altura/2;
-    
+
     drawingSurface.lineWidth = 5; 
     drawingSurface.strokeStyle = 'black';
     drawingSurface.beginPath();
@@ -210,17 +253,18 @@ function die(){
     drawingSurface.fillStyle = "black";
     
     drawingSurface.fillRect(x, y, largura, altura );
-    
+
     drawingSurface.fillStyle = 'red';
     drawingSurface.font = '40px Arial';
     drawingSurface.fillText("Morreste!", (x+largura/2)-80, y+altura/2 );
-    
+
     drawingSurface.font = '20px Arial';
     drawingSurface.fillText("Mataste "+ deadSpiders+ " aranhas", (x+largura/2)-80, y+altura/2+20);
-    
     isGameRuning=false;
+    
 
     //erro proposital
+
     asdasda=asdasdad213
 }
 function levelUpMenu(){
@@ -339,6 +383,22 @@ function loadMonsters() {
     }
 }
 
+function loadHarderMonsters() {
+    life = life + 2;  // para tornar a vida inicial destes mostros maior
+    let enemysQuantity = round + 3;
+    let time = 800;
+
+    if (round % 5 == 0) {
+        levelUpMenu();
+        life = life * 2;
+    }
+
+    for (let i = 0; i < enemysQuantity; i++) {
+        setTimeout(spawnMonster, time);
+        time += 300;
+    }
+}
+
 function moveEntity(entity, destinyX, destinyY, velocity) {
     let deltaX = destinyX - entity.x;
     let deltaY = destinyY - entity.y;
@@ -395,10 +455,6 @@ function strikeLighting(){
 function entitiesActions() {
     let removeEntities = [];
    
-
-
-    
-
     // HERO
     entities.forEach(entity => {
         if (entity instanceof Hero) {
@@ -432,7 +488,6 @@ function entitiesActions() {
             //rotaçao faca
             projectile.rotation += 0.1; 
         }
-
         if (projectile.x === projectile.destinyX && projectile.y === projectile.destinyY) {
             removeEntities.push(projectile);
         } else {
@@ -515,7 +570,7 @@ function keyUpHandler(e) {
 }
 
 function update() {
-    if(isGameRuning ) {
+    if(isGameRuning) {
         if (!lightingIsInTimeout && lightingDamage!=0) {
             setTimeout(() => {
                 strikeLighting();
@@ -532,13 +587,12 @@ function update() {
         }
 
         entitiesActions();
+
         powers.forEach(power => power.update());
         entities.forEach(entity => entity.update());
         projectiles.forEach(projectile => projectile.update());
         monsters.forEach(monster => monster.update());
-        /*setTimeout(() => {
-            requestAnimationFrame(update, canvas); 
-        }, 1000/60);*/
+
         render();
     }
     
