@@ -5,7 +5,7 @@ body {
 
 canvas {
     display: block;
-    background: url("./assets/img/backgroundMenu.jpg");
+    background: url("./assets/img/backgroundMenu.PNG");
     background-size: cover;
     background-position: center;
 }

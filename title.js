@@ -1,4 +1,4 @@
-class Button extends Entity 
+class Title extends Entity 
 {
     constructor(spriteSheet, x, y, canvasWidth, canvasHeight) {
         super();
@@ -37,7 +37,6 @@ class Button extends Entity
     getSprite() {
         return this.frames[this.currentFrame];
     }
-    
    
     setup() {
         this.eStates.STOPPED = this.spriteSheet.getStats('PARADO');
@@ -45,14 +44,6 @@ class Button extends Entity
         this.frames = this.eStates[this.currentState];
         this.width = this.frames[0].width;
         this.height = this.frames[0].height;
-    }
-    
-    stop() {
-        this.toggleState(this.states.STOPPED);
-    }
-    
-    shoot() {
-        this.toggleState(this.states.SHOOT);
     }
 
     toggleState(newState) {

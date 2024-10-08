@@ -10,8 +10,10 @@ let projectiles = [];
 let monsters = [];
 let activeKeys = new Array(255);
 let isGameStarted = false;
+let title = undefined;
 let button = undefined;
 let round = 1;
+let life = 5;
 
 let keyboard = {
     SPACE: 32,
@@ -29,18 +31,26 @@ function init() {
     canvas.height = window.innerHeight;
     drawingSurface = canvas.getContext("2d");
 
-    // Menu
-    spriteSheetButton = new SpriteSheet("assets/img/btnPlay.png", "assets/button.json", carregarBotao);
+    spriteSheetTitle = new SpriteSheet("assets/img/title.png", "assets/title.json", loadTitle);
+
+    spriteSheetButton = new SpriteSheet("assets/img/btnMenu.png", "assets/button.json", loadButton);
     canvas.addEventListener("click", canvasClick);
 }
 
-// MENU
-function carregarBotao() {
-    button = new Button(spriteSheetButton, canvas.width * 0.5 - 128, canvas.height * 0.5 - 258 * 0.5, canvas.width, canvas.height);
+function loadTitle() {
+    title = new Title(spriteSheetTitle, canvas.width * 0.5 - 405.5, canvas.height * 0.5 - 600 * 0.5, canvas.width, canvas.height);
+    entities.push(title);
+    update();
+}
+
+function loadButton() {
+    button = new Button(spriteSheetButton, canvas.width * 0.5 - 250, canvas.height * 0.5 - 10 * 0.5, canvas.width, canvas.height);
     entities.push(button);
     update();
 }
-function a(){}
+
+
+function a() { }
 
 function startgame() {
     isGameStarted = true;
@@ -51,15 +61,16 @@ function startgame() {
     spriteSheetEnemy = new SpriteSheet("assets/img/monster.png", "assets/monster.json", spawnMonster);
     spriteSheetKnife = new SpriteSheet("assets/img/knife.png", "assets/knife.json", a);
     spriteSheetLightning = new SpriteSheet("assets/img/lightning.png", "assets/lightning.json", a);
+
     //começar rondas
     setInterval(() => {
         startRound();
     }, 5000);
 
-
     setInterval(() => {
         strikeLighting();
     }, 5000);
+    
     update();
 
     window.addEventListener("keydown", keyDownHandler, false);
@@ -67,7 +78,7 @@ function startgame() {
 }
 
 function startRound() {
-    if (monsters.length ==0) {
+    if (monsters.length == 0) {
         loadMonsters();
         round++;
     }
@@ -88,6 +99,7 @@ function canvasClick(e) {
     } else if (clickedX > button.x && clickedX < button.x + button.width && clickedY > button.y && clickedY < button.y + button.height) {
         //CLICOU NO BOTAO
         entities.pop(button);
+        entities.pop(title);
         startgame();
     }
 }
@@ -99,8 +111,12 @@ function heroLoaded() {
 
 function spawnMonster() {
     const MARGEM = 1000;
+    let enemy;
+    
+
     if (hero != null) {
         let x, y;
+
         do {
             x = Math.random() * canvas.width;
             y = Math.random() * canvas.height;
@@ -108,19 +124,23 @@ function spawnMonster() {
             x > (hero.x + hero.width + MARGEM) || x < (hero.x - MARGEM) ||
             y > (hero.y + hero.height + MARGEM) || y < (hero.y - MARGEM)
         );
-
-        let enemy = new Monster(spriteSheetEnemy, x, y, 1, canvas.width, canvas.height, 5);
+        
+        enemy = new Monster(spriteSheetEnemy, x, y, 1, canvas.width, canvas.height, life);
         monsters.push(enemy);
     }
 }
 
 function loadMonsters() {
-    let enemysQuantity = round * 5;
+    let enemysQuantity = round + 2;
     let time = 1000;
+
+    if (round % 5 == 0) {
+        life = life * 2;
+    }
 
     for (let i = 0; i < enemysQuantity; i++) {
         setTimeout(spawnMonster, time);
-        time += 500;
+        time += 300;
     }
 }
 
@@ -252,8 +272,6 @@ function keyUpHandler(e) {
         hero.stop();
     }
 }
-
-
 
 function update() {
     entitiesActions();

@@ -2,7 +2,7 @@
     {
         "PARADO_01.png":
         {
-            "frame": {"x":0,"y":0,"w":500,"h":187},
+            "frame": {"x":0,"y":0,"w":811,"h":66},
             "rotated": false,
             "trimmed": false,
             "spriteSourceSize": {"x":0,"y":0,"w":22,"h":21},
